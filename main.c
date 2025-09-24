@@ -60,8 +60,8 @@ int main(void) {
     MCUCR |= _BV(ISC00);
     // enable Pin Change interrupt
     GIMSK |= _BV(PCIE);
-    // enable SREG - TODO? 
-
+    // enable SREG
+    sei(); // macro - memory barrier? 
     // enable pins
     PCMSK |= _BV(HEARTBEAT_PIN_INTERRUPT);
 
