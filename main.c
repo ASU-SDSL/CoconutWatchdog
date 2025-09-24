@@ -5,34 +5,36 @@
  * Created on September 24, 2025, 12:58 AM
  */
 
+// config defines
+#define F_CPU 8000000UL    // used for util/delay.h
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include 
-
-#define SEC 1000000 
+#include <avr/io.h>
+#include <util/delay.h>
 
 /*
  * 
  */
-int main(int argc, char** argv) {
+int main(void) {
    
     // set up pin as output 
+    DDRB |= _BV(DDB4); 
     
-    uint8_t pin_state = 0; 
-    uint32_t it = 0; 
+    // initialize PB4 to LOW
+    PORTB &= ~_BV(PB4);
     
+            
     while(1){
-        // toggle at wrap 
-        if(it == SEC){
-            pin_state = !pin_state; 
-        }
+        // toggle pin with PINxn 
+        PINB |= _BV(PINB4); 
         
-        it++; 
+        _delay_ms(1000); 
     }
     
 
-    return (EXIT_SUCCESS);
+    return 0;
 }
 
 /**
