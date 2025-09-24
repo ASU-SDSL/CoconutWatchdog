@@ -11,26 +11,78 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 
+// normal defines 
+#define HEARTBEAT_PIN PB3
+#define HEARTBEAT_PIN_INTERRUPT PCINT3
+#define HEARTBEAT_PIN_INPUT PINB3
+
+#define RESET_PIN_DIR DDB2
+#define RESET_PIN PB2
+#define LED_BLINK_PIN_DIR DDB3 // overlap 
+#define LED_BLINK_PIN PB3
+
+// local configs 
+#define MS_WAIT_AFTER_BOOT (1000UL * 60 * 5)  // 5 min 
+#define MS_WAIT_IN_OP (1000UL * 60)           // 1 min 
+
+volatile bool beat = false; 
+
+ISR(PCINT0_vect) {
+  if ((PINB & _BV(HEARTBEAT_PIN_INPUT)) != 0) {
+    beat = true;
+  }
+}
 /*
  * 
  */
 int main(void) {
    
+    // setup for blink 
     // set up pin as output 
-    DDRB |= _BV(DDB4); 
-    
+    DDRB |= _BV(LED_BLINK_PIN_DIR); 
     // initialize PB4 to LOW
-    PORTB &= ~_BV(PB4);
+    PORTB &= ~_BV(LED_BLINK_PIN); 
     
+    // setup for being a watchdog
+    // set reseting pin to output, low 
+    PORTB &= ~_BV(RESET_PIN); 
+    DDRB |= _BV(RESET_PIN_DIR); 
+    // set pin to input 
+    DDRB |= ~_BV(HEARTBEAT_PIN); 
+    // any logical change interrupt
+    MCUCR &= ~(_BV(ISC01) | _BV(ISC00));
+    MCUCR |= _BV(ISC00);
+    // enable Pin Change interrupt
+    GIMSK |= _BV(PCIE);
+    // enable SREG - TODO? 
+
+    // enable pins
+    PCMSK |= _BV(HEARTBEAT_PIN_INTERRUPT);
+
+    // setup for internal watchdog
             
+    
+    _delay_ms(MS_WAIT_AFTER_BOOT);  // wait 10s to start checking
     while(1){
+        _delay_ms(MS_WAIT_IN_OP);  // check every period
         // toggle pin with PINxn 
-        PINB |= _BV(PINB4); 
+        PINB |= _BV(LED_BLINK_PIN); 
         
-        _delay_ms(1000); 
+        if (beat == false) {  // if either beat hasn't changed
+            // one of the tasks if frozen, reset
+            PORTB |= _BV(RESET_PIN);
+            _delay_ms(500);
+            PORTB &= ~_BV(RESET_PIN);
+            _delay_ms(MS_WAIT_AFTER_BOOT);  // give the pico time to setup again
+        }
+        // clear beats
+        beat = false;
     }
     
 
