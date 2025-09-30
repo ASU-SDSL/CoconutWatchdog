@@ -24,12 +24,12 @@
 
 #define RESET_PIN_DIR DDB2
 #define RESET_PIN PB2
-#define LED_BLINK_PIN_DIR DDB3 // overlap 
-#define LED_BLINK_PIN PB3
+#define LED_BLINK_PIN_DIR DDB4
+#define LED_BLINK_PIN PB4
 
 // local configs 
-#define MS_WAIT_AFTER_BOOT (1000UL * 60 * 5)  // 5 min 
-#define MS_WAIT_IN_OP (1000UL * 60)           // 1 min 
+#define MS_WAIT_AFTER_BOOT (1000UL * 10)  // 10 sec 
+#define MS_WAIT_IN_OP (1000UL * 5)        // 5 sec 
 
 volatile bool beat = false; 
 

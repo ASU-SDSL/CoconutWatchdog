@@ -4,3 +4,6 @@ dist
 Makefile-*
 Package-*
 private
+*.log
+*.log.inx
+debug
