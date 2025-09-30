@@ -6,7 +6,8 @@
  */
 
 // config defines
-#define F_CPU 8000000UL    // used for util/delay.h
+// internal 8MHz clock is divided by 8 
+#define F_CPU 1000000UL    // used for util/delay.h
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,13 +73,15 @@ int main(void) {
     while(1){
         _delay_ms(MS_WAIT_IN_OP);  // check every period
         // toggle pin with PINxn 
-        PINB |= _BV(LED_BLINK_PIN); 
+//        PINB |= _BV(LED_BLINK_PIN); 
         
         if (beat == false) {  // if either beat hasn't changed
             // one of the tasks if frozen, reset
             PORTB |= _BV(RESET_PIN);
+            PORTB |= _BV(LED_BLINK_PIN); 
             _delay_ms(500);
             PORTB &= ~_BV(RESET_PIN);
+            PORTB &= ~_BV(LED_BLINK_PIN); 
             _delay_ms(MS_WAIT_AFTER_BOOT);  // give the pico time to setup again
         }
         // clear beats
